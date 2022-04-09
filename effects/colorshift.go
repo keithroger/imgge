@@ -15,7 +15,7 @@ type ColorShift struct {
 	blocks              []colorShiftBlock
 }
 
-func NewColorShift(img draw.Image, maxHeight, maxShift, n int) ColorShift {
+func NewColorShift(img draw.Image, maxHeight, maxShift, n int) *ColorShift {
 	b := img.Bounds()
 	imgWidth := b.Max.X
 	imgHeight := b.Max.Y
@@ -33,7 +33,7 @@ func NewColorShift(img draw.Image, maxHeight, maxShift, n int) ColorShift {
 		}
 	}
 
-	return ColorShift{
+	return &ColorShift{
 		imgWidth:  imgWidth,
 		imgHeight: imgHeight,
         MaxHeight: maxHeight,
@@ -66,6 +66,12 @@ func (c *ColorShift) Apply(img draw.Image) {
 		}
 	}
 }
+
+func (c *ColorShift) ApplyNext(img draw.Image) {}
+
+func (c *ColorShift) Randomize()
+
+func (c *ColorShift) Name() string{ return "colorshift" }
 
 type colorShiftBlock struct {
 	shift       int
