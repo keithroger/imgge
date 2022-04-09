@@ -35,7 +35,8 @@ func main() {
 	draw.Draw(img, img.Bounds(), jpg, image.Point{}, draw.Src)
 
 	examples := []imgge.Effect{
-		effects.NewShift(img, 50, 20, 35),
+		effects.NewShift(img, 20, 10, 25),
+        effects.NewColorShift(img, 20, 10, 25),
 	}
 
 	if !contains(examples, effectSelected) {

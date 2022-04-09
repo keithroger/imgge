@@ -20,7 +20,6 @@ func (s *Shift) Apply(img draw.Image) {
 
 	for _, block := range s.blocks {
 		draw.Draw(img, block.rectangle1, src, block.srcPoint1, draw.Src)
-		draw.Draw(img, block.rectangle2, src, block.srcPoint2, draw.Src)
 	}
 }
 
@@ -72,6 +71,6 @@ func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 }
 
 type shiftBlock struct {
-	srcPoint1, srcPoint2   image.Point
-	rectangle1, rectangle2 image.Rectangle
+	srcPoint1 image.Point
+	rectangle1 image.Rectangle
 }
