@@ -1,2 +1,4 @@
 # testing directory
 test_output/
+
+*.png

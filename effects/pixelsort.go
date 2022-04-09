@@ -1,4 +1,4 @@
-package imgge
+package effects
 
 import (
 	"image/color"

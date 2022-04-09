@@ -1,4 +1,4 @@
-package imgge
+package effects
 
 import (
 	"image"
@@ -27,7 +27,11 @@ func (s *Shift) Apply(img draw.Image) {
 // Draws next frame to create a jiggling animation of rows.
 func (s *Shift) ApplyNext(img draw.Image) {}
 
-func NewShift(img draw.Image, maxHeight, maxShift, n int) Shift {
+func (s *Shift) Randomize() {}
+
+func (s *Shift) Name() string {return "Shift"}
+
+func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 	b := img.Bounds()
 	imgWidth := b.Max.X
 	imgHeight := b.Max.Y
@@ -69,7 +73,7 @@ func NewShift(img draw.Image, maxHeight, maxShift, n int) Shift {
 		}
 	}
 
-	return Shift{
+	return &Shift{
 		imgWidth:  imgWidth,
 		imgHeight: imgHeight,
 		MaxHeight: maxHeight,

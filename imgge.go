@@ -13,4 +13,6 @@ type Effect interface {
 
 	// resets random components of effect
 	Randomize()
+
+    Name() string
 }
