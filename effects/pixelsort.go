@@ -28,6 +28,12 @@ func (p *PixelSort) Apply(img draw.Image) {
 	}
 }
 
+func (p *PixelSort) ApplyNext(img draw.Image) {}
+
+func (p *PixelSort) Randomize() {}
+
+func (p *PixelSort) Name() string {return "pixelsort"}
+
 func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []color.Color) {
     for i, c := range pixels {
 		if p.orientation == "horiz" {
@@ -40,7 +46,7 @@ func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []co
 	}
 }
 
-func NewPixelSort(img draw.Image, maxLen, n int, orientation string) PixelSort {
+func NewPixelSort(img draw.Image, maxLen, n int, orientation string) *PixelSort {
 	b := img.Bounds()
 	imgWidth := b.Max.X
 	imgHeight := b.Max.Y
@@ -50,11 +56,18 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) PixelSort {
 	blocks := make([]pixelSortBlock, n)
 
 	for i := range blocks {
-        x0 := rand.Intn(imgWidth)
-        y0 := rand.Intn(imgHeight)
-        length := rand.Intn(maxLen)
+        var x0, y0, length int
 
+        for  {
+            x0 = rand.Intn(imgWidth)
+            y0 = rand.Intn(imgHeight)
+            length = rand.Intn(maxLen)
 
+            if doesFit(x0, y0, imgWidth, imgHeight, length, orientation) {
+                break
+            }
+        }
+        
 		blocks[i] = pixelSortBlock{
 			x0:     x0,
 			y0:     y0,
@@ -62,7 +75,7 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) PixelSort {
 		}
 	}
 
-	return PixelSort{
+	return &PixelSort{
 		imgWidth:    imgWidth,
 		imgHeight:   imgHeight,
 		maxLen:      maxLen,
@@ -70,6 +83,16 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) PixelSort {
 		orientation: orientation,
 		blocks:      blocks,
 	}
+}
+
+func doesFit(x, y, w, h, length int, orientation string) bool {
+    if orientation == "horiz" && x + length > w {
+        return false
+    } else if orientation == "vert" && y + length > h {
+        return false
+    }
+    
+    return true
 }
 
 type pixelSortBlock struct {

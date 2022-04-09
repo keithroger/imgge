@@ -50,6 +50,10 @@ func (c *ColorShift) Apply(img draw.Image) {
 		if block.isBlueShift {
 			for x := c.imgWidth; x > block.shift; x-- {
 				for y := block.y; y < block.y+block.rowHeight; y++ {
+                    if x-block.shift >= c.imgWidth || y > c.imgHeight {
+                        continue
+                    }
+
 					_, _, b, _ := src.At(x-block.shift, y).RGBA()
 					r0, g0, _, a0 := src.At(x, y).RGBA()
 					img.Set(x, y, color.RGBA{uint8(r0), uint8(g0), uint8(b), uint8(a0)})
@@ -58,6 +62,10 @@ func (c *ColorShift) Apply(img draw.Image) {
 		} else {
 			for x := block.shift; x < c.imgWidth; x++ {
 				for y := block.y; y < block.y+block.rowHeight; y++ {
+                    if x+block.shift >= c.imgWidth || y > c.imgHeight {
+                        continue
+                    }
+
 					r, _, _, _ := src.At(x+block.shift, y).RGBA()
 					_, g0, b0, a0 := src.At(x, y).RGBA()
 					img.Set(x, y, color.RGBA{uint8(r), uint8(g0), uint8(b0), uint8(a0)})
@@ -69,7 +77,7 @@ func (c *ColorShift) Apply(img draw.Image) {
 
 func (c *ColorShift) ApplyNext(img draw.Image) {}
 
-func (c *ColorShift) Randomize()
+func (c *ColorShift) Randomize() {}
 
 func (c *ColorShift) Name() string{ return "colorshift" }
 

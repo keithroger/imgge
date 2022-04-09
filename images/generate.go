@@ -4,14 +4,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/keithroger/imgge"
-	"github.com/keithroger/imgge/effects"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"log"
 	"os"
+	"strconv"
+
+	"github.com/keithroger/imgge"
+	"github.com/keithroger/imgge/effects"
 )
 
 var (
@@ -31,12 +33,14 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	img := image.NewRGBA(jpg.Bounds())
-	draw.Draw(img, img.Bounds(), jpg, image.Point{}, draw.Src)
+    img := image.NewRGBA(jpg.Bounds())
+    draw.Draw(img, img.Bounds(), jpg, image.Point{}, draw.Src)
 
 	examples := []imgge.Effect{
-		effects.NewShift(img, 20, 10, 25),
-        effects.NewColorShift(img, 20, 10, 25),
+		effects.NewShift(img, 20, 30, 25),
+        effects.NewColorShift(img, 20, 30, 25),
+        effects.NewPixelSort(img, 50, 3000, "horiz"),
+        effects.NewPixelPop(img, 3, 20, 700),
 	}
 
 	if !contains(examples, effectSelected) {
@@ -45,9 +49,12 @@ func main() {
 
 	for i := range examples {
 		if *effectSelected == "all" || *effectSelected == examples[i].Name() {
+            img := image.NewRGBA(jpg.Bounds())
+            draw.Draw(img, img.Bounds(), jpg, image.Point{}, draw.Src)
+
 			fmt.Printf("Creating %s example\n", examples[i].Name())
 			examples[i].Apply(img)
-			outfile, err := os.Create(examples[i].Name() + ".png")
+			outfile, err := os.Create("example" + strconv.Itoa(i) + "_" + examples[i].Name() + ".png")
 			if err != nil {
 				log.Fatalln(err)
 			}
