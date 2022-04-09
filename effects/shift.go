@@ -29,7 +29,7 @@ func (s *Shift) ApplyNext(img draw.Image) {}
 
 func (s *Shift) Randomize() {}
 
-func (s *Shift) Name() string {return "Shift"}
+func (s *Shift) Name() string {return "shift"}
 
 func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 	b := img.Bounds()
@@ -52,25 +52,13 @@ func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 				image.Point{randX, randY},
 				image.Point{imgWidth, randY + rowHeight},
 			}
-
-			blocks[i].srcPoint2 = image.Point{imgWidth - randX, randY}
-			blocks[i].rectangle2 = image.Rectangle{
-				image.Point{0, randY},
-				image.Point{randX, randY + rowHeight},
-			}
 		} else {
 			blocks[i].srcPoint1 = image.Point{randX, randY}
 			blocks[i].rectangle1 = image.Rectangle{
 				image.Point{0, randY},
 				image.Point{imgWidth - randX, randY + rowHeight},
 			}
-
-			blocks[i].srcPoint2 = image.Point{0, randY}
-			blocks[i].rectangle2 = image.Rectangle{
-				image.Point{imgWidth - randX, randY},
-				image.Point{imgWidth, randY + rowHeight},
-			}
-		}
+        }
 	}
 
 	return &Shift{
