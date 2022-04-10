@@ -3,6 +3,8 @@
 ## General
 - Impliment randomize function for effects
 - Impliment ApplyNext function for effects
+- Seperate testing from generating images
+- Remove random seed from individual functions
 
 ## Shift
 - Add orientation parameter
