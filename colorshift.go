@@ -58,7 +58,11 @@ func (c *ColorShift) Apply(img draw.Image) {
 	}
 }
 
-func (c *ColorShift) ApplyNext(img draw.Image) {}
+func (c *ColorShift) Next() {
+	for i := range c.blocks {
+		c.blocks[i].y += rand.Intn(3) - 1
+	}
+}
 
 func (c *ColorShift) Randomize() {
 	c.blocks = randomColorShiftBlocks(c.Rect, c.MaxHeight, c.MaxShift, c.N)

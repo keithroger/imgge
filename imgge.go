@@ -14,7 +14,7 @@ type Effect interface {
 	Apply(draw.Image)
 
 	// Draws a new frame to make image animated.
-	ApplyNext(draw.Image)
+	Next()
 
 	// Resets random components of effect.
 	Randomize()

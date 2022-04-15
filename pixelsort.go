@@ -38,7 +38,12 @@ func (p *PixelSort) Apply(img draw.Image) {
 	}
 }
 
-func (p *PixelSort) ApplyNext(img draw.Image) {}
+func (p *PixelSort) Next() {
+	for i := range p.blocks {
+		p.blocks[i].srcPt.X += rand.Intn(3) - 1
+		p.blocks[i].srcPt.Y += rand.Intn(3) - 1
+	}
+}
 
 func (p *PixelSort) Randomize() {
 	p.blocks = randomPixelSortBlocks(p.Rect, p.MaxLen, p.N, p.Orientation)
@@ -59,21 +64,20 @@ func randomPixelSortBlocks(r image.Rectangle, maxLen, n int, orientation string)
 	}
 
 	for i := range blocks {
-		var x0, y0, length int
+		var x, y, length int
 
 		for {
-			x0 = rand.Intn(r.Max.X)
-			y0 = rand.Intn(r.Max.Y)
+			x = rand.Intn(r.Max.X)
+			y = rand.Intn(r.Max.Y)
 			length = rand.Intn(maxLen)
 
-			if doesFit(x0, y0, r.Max.X, r.Max.Y, length, orientation) {
+			if doesFit(x, y, r.Max.X, r.Max.Y, length, orientation) {
 				break
 			}
 		}
 
 		blocks[i] = pixelSortBlock{
-			x0:     x0,
-			y0:     y0,
+			srcPt:  image.Point{x, y},
 			length: length,
 		}
 	}
@@ -84,9 +88,9 @@ func randomPixelSortBlocks(r image.Rectangle, maxLen, n int, orientation string)
 func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []color.Color) {
 	for i, c := range pixels {
 		if p.Orientation == horizontal {
-			img.Set(block.x0+i, block.y0, c)
+			img.Set(block.srcPt.X+i, block.srcPt.Y, c)
 		} else if p.Orientation == vertical {
-			img.Set(block.x0, block.y0+i, c)
+			img.Set(block.srcPt.X, block.srcPt.Y+i, c)
 		}
 	}
 }
@@ -102,7 +106,7 @@ func doesFit(x, y, w, h, length int, orientation string) bool {
 }
 
 type pixelSortBlock struct {
-	x0, y0 int
+	srcPt  image.Point
 	length int
 }
 
@@ -112,9 +116,9 @@ func (p *pixelSortBlock) getPixels(img draw.Image, orientation string) []color.C
 	for i := p.length - 1; i >= 0; i-- {
 		switch orientation {
 		case horizontal:
-			pixels[i] = img.At(p.x0+i, p.y0)
+			pixels[i] = img.At(p.srcPt.X+i, p.srcPt.Y)
 		case vertical:
-			pixels[i] = img.At(p.x0, p.y0+i)
+			pixels[i] = img.At(p.srcPt.X, p.srcPt.Y+i)
 		default:
 			log.Fatalf("Orientation must be \"%s\" or \"%s\"", horizontal, vertical)
 		}

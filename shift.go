@@ -28,12 +28,17 @@ func (s *Shift) Apply(img draw.Image) {
 	src := img
 
 	for _, block := range s.blocks {
-		draw.Draw(img, block.rectangle1, src, block.srcPoint1, draw.Src)
+		draw.Draw(img, block.rectangle, src, block.srcPt, draw.Src)
 	}
 }
 
 // Draws next frame to create a jiggling animation of rows.
-func (s *Shift) ApplyNext(img draw.Image) {}
+func (s *Shift) Next() {
+	for i := range s.blocks {
+		s.blocks[i].srcPt.X += rand.Intn(3) - 1
+		s.blocks[i].srcPt.Y += rand.Intn(3) - 1
+	}
+}
 
 func (s *Shift) Randomize() {
 	s.blocks = randomShiftBlocks(s.Rect, s.MaxHeight, s.MaxShift, s.N)
@@ -52,14 +57,14 @@ func randomShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []shiftBlo
 
 		// shift left or right randomly
 		if rand.Intn(2) == 1 {
-			blocks[i].srcPoint1 = image.Point{0, randY}
-			blocks[i].rectangle1 = image.Rectangle{
+			blocks[i].srcPt = image.Point{0, randY}
+			blocks[i].rectangle = image.Rectangle{
 				image.Point{randX, randY},
 				image.Point{imgW, randY + rowHeight},
 			}
 		} else {
-			blocks[i].srcPoint1 = image.Point{randX, randY}
-			blocks[i].rectangle1 = image.Rectangle{
+			blocks[i].srcPt = image.Point{randX, randY}
+			blocks[i].rectangle = image.Rectangle{
 				image.Point{0, randY},
 				image.Point{imgH - randX, randY + rowHeight},
 			}
@@ -70,6 +75,6 @@ func randomShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []shiftBlo
 }
 
 type shiftBlock struct {
-	srcPoint1  image.Point
-	rectangle1 image.Rectangle
+	srcPt     image.Point
+	rectangle image.Rectangle
 }

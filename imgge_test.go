@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/keithroger/imgge"
@@ -54,33 +53,39 @@ func TestEffects(t *testing.T) {
 
 	r := image.Rect(0, 0, imgW, imgH)
 
-	tt := []imgge.Effect{
-		imgge.NewShift(r, 20, 30, 25),
-		imgge.NewColorShift(r, 20, 30, 25),
-		imgge.NewPixelSort(r, 50, 100, "horiz"),
-		imgge.NewPixelSort(r, 50, 100, "vert"),
-		imgge.NewPixelPop(r, 15, 50, 50),
+	tt := []struct {
+		name   string
+		effect imgge.Effect
+	}{
+		{"Shift", imgge.NewShift(r, 20, 30, 25)},
+		{"ColorShift", imgge.NewColorShift(r, 20, 30, 25)},
+		{"PixelSortHoriz", imgge.NewPixelSort(r, 50, 100, "horiz")},
+		{"PixelSortVert", imgge.NewPixelSort(r, 50, 100, "vert")},
+		{"PixelPop", imgge.NewPixelPop(r, 15, 50, 100)},
 	}
 
 	for _, tc := range tt {
-		effect := tc
+		tc := tc
 
-		effectName := reflect.TypeOf(effect).Elem().Name()
-
-		// Test Apply() from Effects interface.
-		tName := effectName + "Apply"
-		t.Run(effectName, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
+			// Test Apply() from Effects interface.
 			img := sampleImg(r)
-			effect.Apply(img)
-			outputPNG(img, tName+"Apply.png")
+			tc.effect.Apply(img)
+			outputPNG(img, tc.name+"Apply.png")
 
-		// Test Randomize() from Effects interface.
+			// Test Next() from Effect interface.
 			img = sampleImg(r)
-			effect.Randomize()
-			effect.Apply(img)
-			outputPNG(img, effectName +"Randomize.png")
+			tc.effect.Next()
+			tc.effect.Apply(img)
+			outputPNG(img, tc.name+"Next.png")
+
+			// Test Randomize() from Effect interface.
+			img = sampleImg(r)
+			tc.effect.Randomize()
+			tc.effect.Apply(img)
+			outputPNG(img, tc.name+"Randomize.png")
 		})
 	}
 }
