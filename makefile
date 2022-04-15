@@ -10,6 +10,9 @@ imagedir:
 test: imagedir
 	go test ./...
 
+test-v: imagedir
+	go test ./... -v
+
 cover: imagedir
 	go test ./... -cover
 
