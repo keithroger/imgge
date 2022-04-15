@@ -65,27 +65,22 @@ func TestEffects(t *testing.T) {
 	for _, tc := range tt {
 		effect := tc
 
-		fName := reflect.TypeOf(effect).Elem().Name()
+		effectName := reflect.TypeOf(effect).Elem().Name()
 
 		// Test Apply() from Effects interface.
-		tName := fName + "Apply"
-		t.Run(tName, func(t *testing.T) {
+		tName := effectName + "Apply"
+		t.Run(effectName, func(t *testing.T) {
 			t.Parallel()
 
 			img := sampleImg(r)
 			effect.Apply(img)
-			outputPNG(img, tName+".png")
-		})
+			outputPNG(img, tName+"Apply.png")
 
 		// Test Randomize() from Effects interface.
-		tName = fName + "Randomize"
-		t.Run(tName, func(t *testing.T) {
-			t.Parallel()
-
-			img := sampleImg(r)
+			img = sampleImg(r)
 			effect.Randomize()
 			effect.Apply(img)
-			outputPNG(img, tName+".png")
+			outputPNG(img, effectName +"Randomize.png")
 		})
 	}
 }
