@@ -1,10 +1,9 @@
-package effects
+package imgge
 
 import (
 	"image"
 	"image/draw"
 	"math/rand"
-	"time"
 )
 
 type Shift struct {
@@ -28,16 +27,12 @@ func (s *Shift) ApplyNext(img draw.Image) {}
 
 func (s *Shift) Randomize() {}
 
-func (s *Shift) Name() string {return "shift"}
-
 func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 	b := img.Bounds()
 	imgWidth := b.Max.X
 	imgHeight := b.Max.Y
 
 	blocks := make([]shiftBlock, n)
-
-	rand.Seed(time.Now().UnixNano())
 
 	for i := range blocks {
 		randX := rand.Intn(maxShift)
@@ -57,7 +52,7 @@ func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 				image.Point{0, randY},
 				image.Point{imgWidth - randX, randY + rowHeight},
 			}
-        }
+		}
 	}
 
 	return &Shift{
@@ -71,6 +66,6 @@ func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 }
 
 type shiftBlock struct {
-	srcPoint1 image.Point
+	srcPoint1  image.Point
 	rectangle1 image.Rectangle
 }

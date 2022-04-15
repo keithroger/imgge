@@ -1,4 +1,4 @@
-package effects
+package imgge
 
 import (
 	"image/color"
@@ -7,7 +7,11 @@ import (
 	"math"
 	"math/rand"
 	"sort"
-	"time"
+)
+
+const (
+	vertical   = "vert"
+	horizontal = "horiz"
 )
 
 type PixelSort struct {
@@ -18,7 +22,7 @@ type PixelSort struct {
 	blocks              []pixelSortBlock
 }
 
-// Pixel sort rows are applied to image at current settings
+// Pixel sort rows are applied to image at current settings.
 func (p *PixelSort) Apply(img draw.Image) {
 	for _, block := range p.blocks {
 		pixels := block.getPixels(img, p.orientation)
@@ -32,16 +36,12 @@ func (p *PixelSort) ApplyNext(img draw.Image) {}
 
 func (p *PixelSort) Randomize() {}
 
-func (p *PixelSort) Name() string {return "pixelsort"}
-
 func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []color.Color) {
-    for i, c := range pixels {
-		if p.orientation == "horiz" {
+	for i, c := range pixels {
+		if p.orientation == horizontal {
 			img.Set(block.x0+i, block.y0, c)
-		} else if p.orientation == "vert" {
+		} else if p.orientation == vertical {
 			img.Set(block.x0, block.y0+i, c)
-		} else {
-			log.Fatal("Orientation must be \"horiz\" or \"vert\"")
 		}
 	}
 }
@@ -51,23 +51,32 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) *PixelSort 
 	imgWidth := b.Max.X
 	imgHeight := b.Max.Y
 
-	rand.Seed(time.Now().UnixNano())
-
 	blocks := make([]pixelSortBlock, n)
 
+	switch orientation {
+	case "hoirz":
+		if maxLen > imgWidth {
+			log.Fatal("Maxlen > image width")
+		}
+	case "vert":
+		if maxLen > imgHeight {
+			log.Fatal("MaxLen > image height")
+		}
+	}
+
 	for i := range blocks {
-        var x0, y0, length int
+		var x0, y0, length int
 
-        for  {
-            x0 = rand.Intn(imgWidth)
-            y0 = rand.Intn(imgHeight)
-            length = rand.Intn(maxLen)
+		for {
+			x0 = rand.Intn(imgWidth)
+			y0 = rand.Intn(imgHeight)
+			length = rand.Intn(maxLen)
 
-            if doesFit(x0, y0, imgWidth, imgHeight, length, orientation) {
-                break
-            }
-        }
-        
+			if doesFit(x0, y0, imgWidth, imgHeight, length, orientation) {
+				break
+			}
+		}
+
 		blocks[i] = pixelSortBlock{
 			x0:     x0,
 			y0:     y0,
@@ -86,13 +95,13 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) *PixelSort 
 }
 
 func doesFit(x, y, w, h, length int, orientation string) bool {
-    if orientation == "horiz" && x + length > w {
-        return false
-    } else if orientation == "vert" && y + length > h {
-        return false
-    }
-    
-    return true
+	if orientation == horizontal && x+length > w {
+		return false
+	} else if orientation == vertical && y+length > h {
+		return false
+	}
+
+	return true
 }
 
 type pixelSortBlock struct {
@@ -104,12 +113,13 @@ func (p *pixelSortBlock) getPixels(img draw.Image, orientation string) []color.C
 	pixels := make([]color.Color, p.length)
 
 	for i := p.length - 1; i >= 0; i-- {
-		if orientation == "horiz" {
+		switch orientation {
+		case horizontal:
 			pixels[i] = img.At(p.x0+i, p.y0)
-		} else if orientation == "vert" {
+		case vertical:
 			pixels[i] = img.At(p.x0, p.y0+i)
-		} else {
-			log.Fatal("Orientation must be \"horiz\" or \"vert\"")
+		default:
+			log.Fatalf("Orientation must be \"%s\" or \"%s\"", horizontal, vertical)
 		}
 	}
 

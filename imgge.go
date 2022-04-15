@@ -5,14 +5,12 @@ import (
 )
 
 type Effect interface {
-	// draws the effect to the image with the structs current settings
+	// Draws the effect to the image with the structs current settings.
 	Apply(draw.Image)
 
-	// draws a new frame to make image animated
+	// Draws a new frame to make image animated.
 	ApplyNext(draw.Image)
 
-	// resets random components of effect
+	// Resets random components of effect.
 	Randomize()
-
-    Name() string
 }
