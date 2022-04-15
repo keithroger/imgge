@@ -6,11 +6,21 @@ import (
 	"math/rand"
 )
 
+func NewPixelPop(r image.Rectangle, minSize, maxSize, n int) *PixelPop {
+	return &PixelPop{
+		Rect:    r,
+		MinSize: minSize,
+		MaxSize: maxSize,
+		N:       n,
+		blocks:  randomPixelPopBlocks(r, minSize, maxSize, n),
+	}
+}
+
 type PixelPop struct {
-	imgWidth, imgHeight int
-	minSize, maxSize    int
-	n                   int
-	blocks              []pixelPopBlock
+	Rect             image.Rectangle
+	MinSize, MaxSize int
+	N                int
+	blocks           []pixelPopBlock
 }
 
 func (p *PixelPop) Apply(img draw.Image) {
@@ -25,15 +35,11 @@ func (p *PixelPop) ApplyNext(img draw.Image) {}
 
 func (p *PixelPop) Randomize() {}
 
-func NewPixelPop(img draw.Image, minSize, maxSize, n int) *PixelPop {
-	b := img.Bounds()
-	imgWidth := b.Max.X
-	imgHeight := b.Max.Y
-
+func randomPixelPopBlocks(r image.Rectangle, minSize, maxSize, n int) []pixelPopBlock {
 	blocks := make([]pixelPopBlock, n)
 
 	for i := range blocks {
-		x, y := rand.Intn(imgWidth), rand.Intn(imgHeight)
+		x, y := rand.Intn(r.Max.X), rand.Intn(r.Max.Y)
 		squareWidth := rand.Intn(maxSize) - minSize
 		rect := image.Rectangle{
 			image.Point{x - squareWidth/2, y - squareWidth/2},
@@ -48,14 +54,7 @@ func NewPixelPop(img draw.Image, minSize, maxSize, n int) *PixelPop {
 		}
 	}
 
-	return &PixelPop{
-		imgWidth:  imgWidth,
-		imgHeight: imgHeight,
-		minSize:   minSize,
-		maxSize:   maxSize,
-		n:         n,
-		blocks:    blocks,
-	}
+	return blocks
 }
 
 type pixelPopBlock struct {

@@ -6,12 +6,22 @@ import (
 	"math/rand"
 )
 
+func NewShift(r image.Rectangle, maxHeight, maxShift, n int) *Shift {
+	return &Shift{
+		Rect:      r,
+		MaxHeight: maxHeight,
+		MaxShift:  maxShift,
+		N:         n,
+		blocks:    randomShiftBlocks(r, maxHeight, maxShift, n),
+	}
+}
+
 type Shift struct {
-	imgWidth, imgHeight int
-	MaxHeight           int
-	MaxShift            int
-	n                   int
-	blocks              []shiftBlock
+	Rect      image.Rectangle
+	MaxHeight int
+	MaxShift  int
+	N         int
+	blocks    []shiftBlock
 }
 
 func (s *Shift) Apply(img draw.Image) {
@@ -25,18 +35,19 @@ func (s *Shift) Apply(img draw.Image) {
 // Draws next frame to create a jiggling animation of rows.
 func (s *Shift) ApplyNext(img draw.Image) {}
 
-func (s *Shift) Randomize() {}
+func (s *Shift) Randomize() {
+	s.blocks = randomShiftBlocks(s.Rect, s.MaxHeight, s.MaxShift, s.N)
+}
 
-func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
-	b := img.Bounds()
-	imgWidth := b.Max.X
-	imgHeight := b.Max.Y
+func randomShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []shiftBlock {
+	imgW := r.Max.X
+	imgH := r.Max.Y
 
 	blocks := make([]shiftBlock, n)
 
 	for i := range blocks {
 		randX := rand.Intn(maxShift)
-		randY := rand.Intn(imgHeight)
+		randY := rand.Intn(imgH)
 		rowHeight := rand.Intn(maxHeight)
 
 		// shift left or right randomly
@@ -44,25 +55,18 @@ func NewShift(img draw.Image, maxHeight, maxShift, n int) *Shift {
 			blocks[i].srcPoint1 = image.Point{0, randY}
 			blocks[i].rectangle1 = image.Rectangle{
 				image.Point{randX, randY},
-				image.Point{imgWidth, randY + rowHeight},
+				image.Point{imgW, randY + rowHeight},
 			}
 		} else {
 			blocks[i].srcPoint1 = image.Point{randX, randY}
 			blocks[i].rectangle1 = image.Rectangle{
 				image.Point{0, randY},
-				image.Point{imgWidth - randX, randY + rowHeight},
+				image.Point{imgH - randX, randY + rowHeight},
 			}
 		}
 	}
 
-	return &Shift{
-		imgWidth:  imgWidth,
-		imgHeight: imgHeight,
-		MaxHeight: maxHeight,
-		MaxShift:  maxShift,
-		n:         n,
-		blocks:    blocks,
-	}
+	return blocks
 }
 
 type shiftBlock struct {

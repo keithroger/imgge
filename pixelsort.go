@@ -1,6 +1,7 @@
 package imgge
 
 import (
+	"image"
 	"image/color"
 	"image/draw"
 	"log"
@@ -9,23 +10,28 @@ import (
 	"sort"
 )
 
-const (
-	vertical   = "vert"
-	horizontal = "horiz"
-)
+func NewPixelSort(r image.Rectangle, maxLen, n int, orientation string) *PixelSort {
+	return &PixelSort{
+		Rect:        r,
+		MaxLen:      maxLen,
+		N:           n,
+		Orientation: orientation,
+		blocks:      randomPixelSortBlocks(r, maxLen, n, orientation),
+	}
+}
 
 type PixelSort struct {
-	imgWidth, imgHeight int
-	maxLen              int
-	n                   int
-	orientation         string
-	blocks              []pixelSortBlock
+	Rect        image.Rectangle
+	MaxLen      int
+	N           int
+	Orientation string
+	blocks      []pixelSortBlock
 }
 
 // Pixel sort rows are applied to image at current settings.
 func (p *PixelSort) Apply(img draw.Image) {
 	for _, block := range p.blocks {
-		pixels := block.getPixels(img, p.orientation)
+		pixels := block.getPixels(img, p.Orientation)
 		sort.Sort(ByLum(pixels))
 
 		p.drawPxSort(img, block, pixels)
@@ -34,32 +40,20 @@ func (p *PixelSort) Apply(img draw.Image) {
 
 func (p *PixelSort) ApplyNext(img draw.Image) {}
 
-func (p *PixelSort) Randomize() {}
-
-func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []color.Color) {
-	for i, c := range pixels {
-		if p.orientation == horizontal {
-			img.Set(block.x0+i, block.y0, c)
-		} else if p.orientation == vertical {
-			img.Set(block.x0, block.y0+i, c)
-		}
-	}
+func (p *PixelSort) Randomize() {
+	p.blocks = randomPixelSortBlocks(p.Rect, p.MaxLen, p.N, p.Orientation)
 }
 
-func NewPixelSort(img draw.Image, maxLen, n int, orientation string) *PixelSort {
-	b := img.Bounds()
-	imgWidth := b.Max.X
-	imgHeight := b.Max.Y
-
+func randomPixelSortBlocks(r image.Rectangle, maxLen, n int, orientation string) []pixelSortBlock {
 	blocks := make([]pixelSortBlock, n)
 
 	switch orientation {
 	case "hoirz":
-		if maxLen > imgWidth {
+		if maxLen > r.Max.X {
 			log.Fatal("Maxlen > image width")
 		}
 	case "vert":
-		if maxLen > imgHeight {
+		if maxLen > r.Max.X {
 			log.Fatal("MaxLen > image height")
 		}
 	}
@@ -68,11 +62,11 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) *PixelSort 
 		var x0, y0, length int
 
 		for {
-			x0 = rand.Intn(imgWidth)
-			y0 = rand.Intn(imgHeight)
+			x0 = rand.Intn(r.Max.X)
+			y0 = rand.Intn(r.Max.Y)
 			length = rand.Intn(maxLen)
 
-			if doesFit(x0, y0, imgWidth, imgHeight, length, orientation) {
+			if doesFit(x0, y0, r.Max.X, r.Max.Y, length, orientation) {
 				break
 			}
 		}
@@ -84,13 +78,16 @@ func NewPixelSort(img draw.Image, maxLen, n int, orientation string) *PixelSort 
 		}
 	}
 
-	return &PixelSort{
-		imgWidth:    imgWidth,
-		imgHeight:   imgHeight,
-		maxLen:      maxLen,
-		n:           n,
-		orientation: orientation,
-		blocks:      blocks,
+	return blocks
+}
+
+func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []color.Color) {
+	for i, c := range pixels {
+		if p.Orientation == horizontal {
+			img.Set(block.x0+i, block.y0, c)
+		} else if p.Orientation == vertical {
+			img.Set(block.x0, block.y0+i, c)
+		}
 	}
 }
 

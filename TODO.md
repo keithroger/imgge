@@ -34,6 +34,7 @@
 ## Testing
 - Work on individual tests
 - Rebuild from last working git commits
+- Test with rectangles in with different coordinates
 
 ## Issue
 - smapleImg should set all alpha values to 255  

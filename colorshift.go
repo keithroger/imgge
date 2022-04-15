@@ -1,53 +1,39 @@
 package imgge
 
 import (
+	"image"
 	"image/color"
 	"image/draw"
 	"math/rand"
 )
 
-type ColorShift struct {
-	imgWidth, imgHeight int
-	MaxHeight           int
-	MaxShift            int
-	n                   int
-	blocks              []colorShiftBlock
-}
-
-func NewColorShift(img draw.Image, maxHeight, maxShift, n int) *ColorShift {
-	b := img.Bounds()
-	imgWidth := b.Max.X
-	imgHeight := b.Max.Y
-
-	blocks := make([]colorShiftBlock, n)
-
-	for i := range blocks {
-		blocks[i] = colorShiftBlock{
-			shift:       rand.Intn(maxShift),
-			y:           rand.Intn(imgHeight),
-			rowHeight:   rand.Intn(maxHeight),
-			isBlueShift: bool(rand.Intn(2) == 1),
-		}
-	}
-
+func NewColorShift(r image.Rectangle, maxHeight, maxShift, n int) *ColorShift {
 	return &ColorShift{
-		imgWidth:  imgWidth,
-		imgHeight: imgHeight,
+		Rect:      r,
 		MaxHeight: maxHeight,
 		MaxShift:  maxShift,
-		n:         n,
-		blocks:    blocks,
+		N:         n,
+		blocks:    randomColorShiftBlocks(r, maxHeight, maxShift, n),
 	}
+}
+
+type ColorShift struct {
+	Rect      image.Rectangle
+	MaxHeight int
+	MaxShift  int
+	N         int
+	blocks    []colorShiftBlock
 }
 
 func (c *ColorShift) Apply(img draw.Image) {
 	src := img
+	w, h := c.Rect.Max.X, c.Rect.Max.Y
 
 	for _, block := range c.blocks {
 		if block.isBlueShift {
-			for x := c.imgWidth; x > block.shift; x-- {
+			for x := w; x > block.shift; x-- {
 				for y := block.y; y < block.y+block.rowHeight; y++ {
-					if x-block.shift >= c.imgWidth || y > c.imgHeight {
+					if x-block.shift >= w || y > h {
 						continue
 					}
 
@@ -57,9 +43,9 @@ func (c *ColorShift) Apply(img draw.Image) {
 				}
 			}
 		} else {
-			for x := block.shift; x < c.imgWidth; x++ {
+			for x := block.shift; x < w; x++ {
 				for y := block.y; y < block.y+block.rowHeight; y++ {
-					if x+block.shift >= c.imgWidth || y > c.imgHeight {
+					if x+block.shift >= w || y > h {
 						continue
 					}
 
@@ -74,9 +60,26 @@ func (c *ColorShift) Apply(img draw.Image) {
 
 func (c *ColorShift) ApplyNext(img draw.Image) {}
 
-func (c *ColorShift) Randomize() {}
+func (c *ColorShift) Randomize() {
+	c.blocks = randomColorShiftBlocks(c.Rect, c.MaxHeight, c.MaxShift, c.N)
+}
 
 func (c *ColorShift) Name() string { return "ColorShift" }
+
+func randomColorShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []colorShiftBlock {
+	blocks := make([]colorShiftBlock, n)
+
+	for i := range blocks {
+		blocks[i] = colorShiftBlock{
+			shift:       rand.Intn(maxShift),
+			y:           rand.Intn(r.Dy()) - r.Min.Y,
+			rowHeight:   rand.Intn(maxHeight),
+			isBlueShift: bool(rand.Intn(2) == 1),
+		}
+	}
+
+	return blocks
+}
 
 type colorShiftBlock struct {
 	shift       int

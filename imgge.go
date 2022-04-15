@@ -4,6 +4,11 @@ import (
 	"image/draw"
 )
 
+const (
+	vertical   = "vert"
+	horizontal = "horiz"
+)
+
 type Effect interface {
 	// Draws the effect to the image with the structs current settings.
 	Apply(draw.Image)

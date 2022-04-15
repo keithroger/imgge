@@ -1,7 +1,6 @@
 package imgge_test
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -11,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/keithroger/imgge"
@@ -22,10 +20,11 @@ const (
 	imgDir     = "test_images"
 )
 
-func sampleImg() draw.Image {
-	img := image.NewRGBA(image.Rect(0, 0, imgW, imgH))
+func sampleImg(r image.Rectangle) draw.Image {
+	img := image.NewRGBA(r)
 	draw.Draw(img, img.Bounds(), image.White, image.Point{0, 0}, draw.Src)
 
+	// Fill image with a chessboard pattern.
 	for i := 0; i < imgW; i++ {
 		for j := 0; j < imgH; j++ {
 			if (i%100 < 50 && j%100 < 50) || ((i+50)%100 < 50 && (j+50)%100 < 50) {
@@ -50,26 +49,43 @@ func outputPNG(img image.Image, filename string) {
 }
 
 func TestEffects(t *testing.T) {
+	t.Parallel()
 	rand.Seed(1984)
 
-	img := sampleImg()
+	r := image.Rect(0, 0, imgW, imgH)
 
 	tt := []imgge.Effect{
-		imgge.NewShift(img, 20, 30, 25),
-		imgge.NewColorShift(img, 20, 30, 25),
-		imgge.NewPixelSort(img, 50, 100, "horiz"),
-		imgge.NewPixelSort(img, 50, 100, "vert"),
-		imgge.NewPixelPop(img, 15, 50, 50),
+		imgge.NewShift(r, 20, 30, 25),
+		imgge.NewColorShift(r, 20, 30, 25),
+		imgge.NewPixelSort(r, 50, 100, "horiz"),
+		imgge.NewPixelSort(r, 50, 100, "vert"),
+		imgge.NewPixelPop(r, 15, 50, 50),
 	}
 
-	// test Apply function
-	for i := range tt {
-		name := reflect.TypeOf(tt[i]).Elem().Name()
+	for _, tc := range tt {
+		effect := tc
 
-		fmt.Printf("Testing %s\n", name)
+		fName := reflect.TypeOf(effect).Elem().Name()
 
-		img := sampleImg()
-		tt[i].Apply(img)
-		outputPNG(img, strconv.Itoa(i)+name+"_Apply.png")
+		// Test Apply() from Effects interface.
+		tName := fName + "Apply"
+		t.Run(tName, func(t *testing.T) {
+			t.Parallel()
+
+			img := sampleImg(r)
+			effect.Apply(img)
+			outputPNG(img, tName+".png")
+		})
+
+		// Test Randomize() from Effects interface.
+		tName = fName + "Randomize"
+		t.Run(tName, func(t *testing.T) {
+			t.Parallel()
+
+			img := sampleImg(r)
+			effect.Randomize()
+			effect.Apply(img)
+			outputPNG(img, tName+".png")
+		})
 	}
 }
