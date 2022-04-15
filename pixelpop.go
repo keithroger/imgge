@@ -33,7 +33,9 @@ func (p *PixelPop) Apply(img draw.Image) {
 
 func (p *PixelPop) ApplyNext(img draw.Image) {}
 
-func (p *PixelPop) Randomize() {}
+func (p *PixelPop) Randomize() {
+    randomPixelPopBlocks(p.Rect, p.MinSize, p.MaxSize, p.N)
+}
 
 func randomPixelPopBlocks(r image.Rectangle, minSize, maxSize, n int) []pixelPopBlock {
 	blocks := make([]pixelPopBlock, n)
