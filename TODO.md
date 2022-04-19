@@ -16,6 +16,8 @@
 ## Effect Ideas
 - PixelPopRain
 - Noise effects
+    - Experiement with different types of noise
+    - Try sampling the image for colors
 - Shift sections incrementally
 
 ## Testing
