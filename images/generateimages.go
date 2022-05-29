@@ -22,6 +22,22 @@ type namedEffect struct {
 	effect   imgge.Effect
 }
 
+func generate(img draw.Image, fx namedEffect, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	fx.effect.Apply(img)
+
+	outfile, err := os.Create(fx.filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = png.Encode(outfile, img)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	rand.Seed(1618)
 
@@ -51,20 +67,4 @@ func main() {
 		go generate(img, fx, &wg)
 	}
 	wg.Wait()
-}
-
-func generate(img draw.Image, fx namedEffect, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	fx.effect.Apply(img)
-
-	outfile, err := os.Create(fx.filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = png.Encode(outfile, img)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
