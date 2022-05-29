@@ -34,7 +34,7 @@ func NewPixelSort(r image.Rectangle, maxLen, n int, orientation string) *PixelSo
 func (p *PixelSort) Apply(img draw.Image) {
 	for _, block := range p.blocks {
 		pixels := block.getPixels(img, p.Orientation)
-		sort.Sort(ByLum(pixels))
+		sort.Sort(byLum(pixels))
 
 		p.drawPxSort(img, block, pixels)
 	}
@@ -136,13 +136,13 @@ func (p *pixelSortBlock) getPixels(img draw.Image, orientation string) []color.C
 	return pixels
 }
 
-type ByLum []color.Color
+type byLum []color.Color
 
-func (l ByLum) Len() int { return len(l) }
+func (l byLum) Len() int { return len(l) }
 
-func (l ByLum) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
+func (l byLum) Swap(i, j int) { l[i], l[j] = l[j], l[i] }
 
-func (l ByLum) Less(i, j int) bool { return luminosity(l[i]) < luminosity(l[j]) }
+func (l byLum) Less(i, j int) bool { return luminosity(l[i]) < luminosity(l[j]) }
 
 func luminosity(c color.Color) float64 {
 	r, g, b, _ := c.RGBA()
