@@ -10,6 +10,16 @@ import (
 	"sort"
 )
 
+// Pixelsort represents an Effect that moves sorts lines of pixels.
+type PixelSort struct {
+	Rect        image.Rectangle
+	MaxLen      int
+	N           int
+	Orientation string
+	blocks      []pixelSortBlock
+}
+
+// NewPixelSort returns a new PixelSort Effect.
 func NewPixelSort(r image.Rectangle, maxLen, n int, orientation string) *PixelSort {
 	return &PixelSort{
 		Rect:        r,
@@ -20,15 +30,7 @@ func NewPixelSort(r image.Rectangle, maxLen, n int, orientation string) *PixelSo
 	}
 }
 
-type PixelSort struct {
-	Rect        image.Rectangle
-	MaxLen      int
-	N           int
-	Orientation string
-	blocks      []pixelSortBlock
-}
-
-// Pixel sort rows are applied to image at current settings.
+// Apply sorts pixels according to the PixelSort settings.
 func (p *PixelSort) Apply(img draw.Image) {
 	for _, block := range p.blocks {
 		pixels := block.getPixels(img, p.Orientation)
@@ -38,6 +40,7 @@ func (p *PixelSort) Apply(img draw.Image) {
 	}
 }
 
+// Next makes small random changes to the source point for the PixelSort
 func (p *PixelSort) Next() {
 	for i := range p.blocks {
 		p.blocks[i].srcPt.X += rand.Intn(3) - 1
@@ -45,10 +48,12 @@ func (p *PixelSort) Next() {
 	}
 }
 
+// Randomize reinitializes the positions of the shifted sections.
 func (p *PixelSort) Randomize() {
 	p.blocks = randomPixelSortBlocks(p.Rect, p.MaxLen, p.N, p.Orientation)
 }
 
+// randomPixelSortBlocks is used to initialize positions of the sorted areas.
 func randomPixelSortBlocks(r image.Rectangle, maxLen, n int, orientation string) []pixelSortBlock {
 	blocks := make([]pixelSortBlock, n)
 
@@ -85,6 +90,7 @@ func randomPixelSortBlocks(r image.Rectangle, maxLen, n int, orientation string)
 	return blocks
 }
 
+// drawPxSort is used to color an array of pixels to the image img.
 func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []color.Color) {
 	for i, c := range pixels {
 		if p.Orientation == horizontal {
@@ -95,6 +101,7 @@ func (p *PixelSort) drawPxSort(img draw.Image, block pixelSortBlock, pixels []co
 	}
 }
 
+// doesFit checks if the pixel sort will fit in when drawn to the image.
 func doesFit(x, y, w, h, length int, orientation string) bool {
 	if orientation == horizontal && x+length > w {
 		return false
@@ -105,11 +112,13 @@ func doesFit(x, y, w, h, length int, orientation string) bool {
 	return true
 }
 
+// pixelSortBlock represents where a the effect will be drawn.
 type pixelSortBlock struct {
 	srcPt  image.Point
 	length int
 }
 
+// getPixels returns an array of pixels to be sorted.
 func (p *pixelSortBlock) getPixels(img draw.Image, orientation string) []color.Color {
 	pixels := make([]color.Color, p.length)
 

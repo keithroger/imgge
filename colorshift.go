@@ -7,6 +7,19 @@ import (
 	"math/rand"
 )
 
+// Colorshift represents an effect that moves blocks randomly left and right by
+// shifting color channels.
+type ColorShift struct {
+	Rect      image.Rectangle
+	MaxHeight int
+	MaxShift  int
+	N         int
+	blocks    []colorShiftBlock
+}
+
+// NewColorShift creates a Colorshift struct.
+// The Effect will be drawn within the rectangle r with shifted blocks
+// max height of maxHeight and max horizontal shift of maxShift.
 func NewColorShift(r image.Rectangle, maxHeight, maxShift, n int) *ColorShift {
 	return &ColorShift{
 		Rect:      r,
@@ -17,14 +30,7 @@ func NewColorShift(r image.Rectangle, maxHeight, maxShift, n int) *ColorShift {
 	}
 }
 
-type ColorShift struct {
-	Rect      image.Rectangle
-	MaxHeight int
-	MaxShift  int
-	N         int
-	blocks    []colorShiftBlock
-}
-
+// Apply shifts sections of the image according to the stucts settings.
 func (c *ColorShift) Apply(img draw.Image) {
 	src := img
 	w, h := c.Rect.Max.X, c.Rect.Max.Y
@@ -58,18 +64,19 @@ func (c *ColorShift) Apply(img draw.Image) {
 	}
 }
 
+// Next makes small random changes to the position of the shifted blocks.
 func (c *ColorShift) Next() {
 	for i := range c.blocks {
 		c.blocks[i].y += rand.Intn(3) - 1
 	}
 }
 
+// Randomize reinitializes the positions of the shifted blocks.
 func (c *ColorShift) Randomize() {
 	c.blocks = randomColorShiftBlocks(c.Rect, c.MaxHeight, c.MaxShift, c.N)
 }
 
-func (c *ColorShift) Name() string { return "ColorShift" }
-
+// randomShiftBlocks is used to initialize position of shifted areas.
 func randomColorShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []colorShiftBlock {
 	blocks := make([]colorShiftBlock, n)
 
@@ -85,6 +92,7 @@ func randomColorShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []col
 	return blocks
 }
 
+// shiftBlock contains the source and destination of the shifted block.
 type colorShiftBlock struct {
 	shift       int
 	y           int

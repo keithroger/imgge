@@ -6,6 +6,18 @@ import (
 	"math/rand"
 )
 
+// Shift represents an effect that moves blocks within the images randomly left or right
+type Shift struct {
+	Rect      image.Rectangle
+	MaxHeight int
+	MaxShift  int
+	N         int
+	blocks    []shiftBlock
+}
+
+// NewShift creates a Shift struct.
+// The Effect will be drawn within the rectangle r with shifted blocks
+// max height of maxHeight and max horizontal shift of maxShift.
 func NewShift(r image.Rectangle, maxHeight, maxShift, n int) *Shift {
 	return &Shift{
 		Rect:      r,
@@ -16,14 +28,7 @@ func NewShift(r image.Rectangle, maxHeight, maxShift, n int) *Shift {
 	}
 }
 
-type Shift struct {
-	Rect      image.Rectangle
-	MaxHeight int
-	MaxShift  int
-	N         int
-	blocks    []shiftBlock
-}
-
+// Apply shifts sections of the image according to the Shift settings.
 func (s *Shift) Apply(img draw.Image) {
 	src := img
 
@@ -32,7 +37,7 @@ func (s *Shift) Apply(img draw.Image) {
 	}
 }
 
-// Draws next frame to create a jiggling animation of rows.
+// Next makes small random changes to the position of the shifted blocks.
 func (s *Shift) Next() {
 	for i := range s.blocks {
 		s.blocks[i].srcPt.X += rand.Intn(3) - 1
@@ -40,10 +45,12 @@ func (s *Shift) Next() {
 	}
 }
 
+// Randomize reinitializes the positions of the shifted blocks.
 func (s *Shift) Randomize() {
 	s.blocks = randomShiftBlocks(s.Rect, s.MaxHeight, s.MaxShift, s.N)
 }
 
+// randomShiftBlocks is used to initialize position of shifted areas.
 func randomShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []shiftBlock {
 	imgW := r.Max.X
 	imgH := r.Max.Y
@@ -74,6 +81,7 @@ func randomShiftBlocks(r image.Rectangle, maxHeight, maxShift, n int) []shiftBlo
 	return blocks
 }
 
+// shiftBlock contains the source and destination of the shifted block.
 type shiftBlock struct {
 	srcPt     image.Point
 	rectangle image.Rectangle
